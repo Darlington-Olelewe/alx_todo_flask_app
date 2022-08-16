@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        .hidden {
+          display: none;
+        }
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          width: 300px;
+        }
+        li {
+          clear: both;
+        }
+        li button {
+          -webkit-appearance: none;
+          border: none;
+          outline: none;
+          color: red;
+          float: right;
+          cursor: pointer;
+          font-size: 20px;
+        }
+        .lists-wrapper, .todos-wrapper {
+          display: inline-block;
+          vertical-align: top;
+        }
+      </style>
+</head>
+<body>
+
+    <form id="form" >
+        <input type="text" name="description" id="description" required >
+        <input type="submit" value="Create">
+    </form>
+    <ul id="todos">
+
+        {% for task in data %}
+        <li><input class="check-completed" data-id="{{ task.id }}" type="checkbox" {% if task.completed %} checked {% endif %}/> {{ task.description }}</li>
+        {% endfor %}
+    </ul>
+
+    <div class = "hidden" id = "error" style="display:none;"> Something went wrong! </div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.check-completed');
+
+    for(let i = 0; i < checkboxes.length; i++){
+    const checkbox = checkboxes[i];
+    checkbox.onchange = (e) =>{
+        console.log('event', e);
+        const newCompleted = e.target.checked;
+        const todoId = e.target.dataset['id'];
+
+        const method = 'POST';
+    const body = JSON.stringify({'completed': newCompleted});
+    const headers = {'Content-Type': 'application/json'};
+        fetch('/todo/'+ todoId +'/check-completed',{
+            method,
+        body,
+        headers 
+        })
+    }
+    }
+
+
+document.getElementById('form').onsubmit = (e)=> {
+    e.preventDefault();
+    const method = 'POST';
+    const body = JSON.stringify({'description': document.getElementById('description').value });
+    const headers = {'Content-Type': 'application/json'};
+    
+    fetch('/todos/create', {
+        method,
+        body,
+        headers 
+    }).then((response) => response.json())
+    .then((response) => {
+    const liItem = document.createElement('LI');
+    liItem.innerHTML = response['description']
+    document.getElementById('todos').appendChild(liItem)})
+    .catch((error)=>{
+        console.log("Error occured");
+        console.log(error);
+    })
+    
+}
+
+
+
+
+</script>
+    
+</body>
+</html>
+
+
+<!-- 
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://postgres:abc@localhost:5432/todoapp
+db = SQLAlchemy(app)
+
+class Todo(db.model):
+   __tablename__ = 'todos'
+   id = db.Column(db.String(), nullable=False)
+   description =  db.Column(db.String(), nullable=False)
+
+@app.route('/todos/create', methods=['POST'])
+def create_todo():
+   description = request.get_json()['description']
+   todo = Todo(description=description)
+   db.session.add(todo)
+   db.session.commit();
+   return jsonify({
+        'description': todo.description
+     })
+
+@app.route('/'
+def index();
+    return renter_template('index.html',data=Todo.queryall()) -->
